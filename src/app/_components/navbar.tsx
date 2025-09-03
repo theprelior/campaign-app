@@ -91,9 +91,9 @@ function UserMenu({ user, isMobile = false }: { user: { name?: string | null, im
 }
 
 function SignInButton() {
-  return <button onClick={() => signIn("github")} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white no-underline transition hover:bg-blue-700">Giriş Yap</button>;
+  return <button onClick={() => signIn("github")} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white no-underline transition hover:bg-blue-700">Login</button>;
 }
 
 function SignOutButton() {
-  return <button onClick={() => signOut({ redirectTo: "/" })} className="w-full rounded-md bg-red-600/80 px-4 py-2 text-sm font-semibold text-white no-underline transition hover:bg-red-600 sm:w-auto">Çıkış Yap</button>;
+  return <button onClick={() => signOut({ redirectTo: "/" })} className="w-full rounded-md bg-red-600/80 px-4 py-2 text-sm font-semibold text-white no-underline transition hover:bg-red-600 sm:w-auto">Logout</button>;
 }

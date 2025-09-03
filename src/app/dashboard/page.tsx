@@ -73,33 +73,33 @@ function DashboardContent() {
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
             {/* Üst Başlık Alanı */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Kampanya Paneli</h1>
-                <p className="text-muted-foreground text-gray-500">Mevcut kampanyalarınızı yönetin ve yenilerini oluşturun.</p>
+                <h1 className="text-3xl font-bold tracking-tight">Campaign Panels</h1>
+                <p className="text-muted-foreground text-gray-500">Manage current campaigns and create new ones.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 {/* Sol Taraf: Form */}
                 <div className="lg:col-span-1">
                     <div className="rounded-lg border bg-card p-6 shadow-sm">
-                        <h2 className="text-xl font-semibold">Yeni Kampanya Oluştur</h2>
+                        <h2 className="text-xl font-semibold">Create New Campaign</h2>
                         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
                             <input
                                 type="text"
-                                placeholder="Kampanya Başlığı"
+                                placeholder="Title of Campaign"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 className="w-full rounded-lg border px-4 py-2"
                                 required
                             />
                             <textarea
-                                placeholder="Açıklama (isteğe bağlı)"
+                                placeholder="Description (Optional)"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 className="w-full rounded-lg border px-4 py-2"
                             />
                             <input
                                 type="number"
-                                placeholder="Bütçe (TL)"
+                                placeholder="Budget (TL)"
                                 value={budget}
                                 onChange={(e) => setBudget(e.target.value)}
                                 className="w-full rounded-lg border px-4 py-2"
@@ -110,7 +110,7 @@ function DashboardContent() {
                                 className="rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:bg-gray-400"
                                 disabled={createCampaign.isPending}
                             >
-                                {createCampaign.isPending ? "Oluşturuluyor..." : "Kampanya Oluştur"}
+                                {createCampaign.isPending ? "Creating..." : "Create Campaign"}
                             </button>
                         </form>
                     </div>
@@ -118,8 +118,8 @@ function DashboardContent() {
 
                 {/* Sağ Taraf: Kampanya Listesi */}
                 <div className="lg:col-span-2">
-                    <h2 className="text-xl font-semibold">Mevcut Kampanyalar</h2>
-                    {isLoading && <p className="mt-4">Kampanyalar yükleniyor...</p>}
+                    <h2 className="text-xl font-semibold">C</h2>
+                    {isLoading && <p className="mt-4">Campaigns are Loading...</p>}
 
                     {/* Kampanya Kartları Grid'i */}
                     <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -131,7 +131,7 @@ function DashboardContent() {
                             >
                                 <div className="h-full rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-500">
                                     <h3 className="font-bold text-lg">{campaign.title}</h3>
-                                    <p className="mt-1 text-sm text-gray-600 flex-grow">{campaign.description || "Açıklama yok."}</p>
+                                    <p className="mt-1 text-sm text-gray-600 flex-grow">{campaign.description || "No description."}</p>
                                     <p className="mt-2 text-right font-semibold text-blue-700">{campaign.budget.toLocaleString()} TL</p>
                                 </div>
                             </Link>
@@ -140,7 +140,7 @@ function DashboardContent() {
 
                     {!isLoading && campaigns?.length === 0 && (
                         <div className="mt-4 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
-                            <p className="text-gray-500">Henüz bir kampanya oluşturmadınız.</p>
+                            <p className="text-gray-500">You haven't created a campaign yet.</p>
                         </div>
                     )}
                 </div>

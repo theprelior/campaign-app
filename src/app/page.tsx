@@ -16,7 +16,7 @@ export default async function HomePage() {
         
         <div className="flex flex-col items-center gap-4">
           <p className="text-center text-2xl">
-            {session ? `Hoş geldin, ${session.user.name}!` : "Kampanyalarını Yönetmeye Başla"}
+            {session ? `Welcome, ${session.user.name}!` : "Start to manage your campaigns"}
           </p>
 
           {/* AuthShowcase: Giriş/Çıkış Butonları */}
@@ -33,7 +33,7 @@ export default async function HomePage() {
                   type="submit"
                   className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
                 >
-                  Giriş Yap
+                  Login
                 </button>
               </form>
             )}
@@ -45,7 +45,7 @@ export default async function HomePage() {
                   href="/dashboard"
                   className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
                 >
-                  Panele Git
+                  Panel
                 </Link>
                 <form
                   action={async () => {
