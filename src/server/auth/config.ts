@@ -64,4 +64,11 @@ export const authConfig = {
       },
     }),
   },
+  events: {
+    error(error) {
+      console.error("=============== AUTH.JS HATASI BAŞLANGIÇ ================");
+      console.error(JSON.stringify(error, null, 2));
+      console.error("================ AUTH.JS HATASI BİTİŞ =================");
+    }
+  },
 } satisfies NextAuthConfig;
