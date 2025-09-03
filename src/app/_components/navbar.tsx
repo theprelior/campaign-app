@@ -1,93 +1,55 @@
 // src/app/_components/navbar.tsx
 
+"use client"; // State kullanacağımız için client component'e çeviriyoruz
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { auth, signIn, signOut } from "~/server/auth";
+import { useSession } from "next-auth/react"; // useSession hook'unu kullanıyoruz
+import { signIn, signOut } from "next-auth/react";
 
-// Ana Navbar bileşeni (Server Component)
-export default async function Navbar() {
-    const session = await auth();
-    const user = session?.user;
+export default function Navbar() {
+  const { data: session } = useSession();
+  const user = session?.user;
+  
+  // Mobil menünün açık/kapalı durumunu tutacak state
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    return (
-        <nav className="flex w-full items-center justify-between bg-gray-800 px-4 py-3 text-white shadow-md sm:px-6 lg:px-8">
-            {/* Left Side: Logo/Name of mark */}
-            <Link href="/" className="text-xl font-bold text-white no-underline">
-                Campaign<span className="text-[hsl(280,100%,70%)]">Manager</span>
-            </Link>
+  return (
+    <nav className="w-full bg-gray-800 text-white shadow-md">
+      <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        {/* Sol Taraf: Logo/Marka Adı */}
+        <Link 
+          href="/" 
+          className="text-xl font-bold text-white no-underline"
+          onClick={() => setIsMenuOpen(false)} // Logoya tıklayınca menüyü kapat
+        >
+          Campaign<span className="text-[hsl(280,100%,70%)]">Manager</span>
+        </Link>
 
-            {/* Right Side: User info and buttons */}
-            <div className="flex items-center gap-4">
-                {user ? <UserMenu user={user} /> : <SignInButton />}
-            </div>
-        </nav>
-    );
-}
-
-// User menu (Server Component)
-function UserMenu({ user }: { user: { name?: string | null, image?: string | null } }) {
-    return (
-        <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-sm font-medium text-white hover:underline">
-                Campaigns
-            </Link>
-
-            <Link href="/dashboard/influencers" className="text-sm font-medium text-white hover:underline">
-                Influencers
-            </Link>
-
-            <div className="h-6 w-px bg-gray-600"></div> {/* Ayırıcı çizgi */}
-
-            {user.image && (
-                <Image
-                    src={user.image}
-                    alt={user.name ?? "User profile"}
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                />
-            )}
-            <span className="hidden font-medium sm:block">{user.name}</span>
-            <SignOutButton />
+        {/* Orta/Büyük Ekran Menüsü (Desktop Menu) */}
+        <div className="hidden items-center gap-4 md:flex">
+          {user ? <UserMenu user={user} /> : <SignInButton />}
         </div>
-    );
-}
 
-
-// Login button (Client Component)
-function SignInButton() {
-    return (
-        <form
-            action={async () => {
-                "use server";
-                await signIn("github");
-            }}
-        >
-            <button
-                type="submit"
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white no-underline transition hover:bg-blue-700"
-            >
-                Sign In
+        {/* Mobil Ekran Hamburger Butonu */}
+        <div className="md:hidden">
+          {user && (
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+              {isMenuOpen ? (
+                // Kapatma ikonu (X)
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                // Hamburger ikonu (☰)
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              )}
             </button>
-        </form>
-    );
-}
+          )}
+        </div>
+      </div>
 
-// Logout button (Client Component)
-function SignOutButton() {
-    return (
-        <form
-            action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/" });
-            }}
-        >
-            <button
-                type="submit"
-                className="rounded-md bg-red-600/80 px-4 py-2 text-sm font-semibold text-white no-underline transition hover:bg-red-600"
-            >
-                Log Out
-            </button>
-        </form>
-    );
-}
+      {/* Açılır Mobil Menü */}
