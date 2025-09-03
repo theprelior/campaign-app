@@ -57,7 +57,7 @@ export default async function HomePage() {
                     type="submit"
                     className="rounded-full bg-red-600/50 px-10 py-3 font-semibold no-underline transition hover:bg-red-600/70"
                   >
-                    Çıkış Yap
+                    Logout
                   </button>
                 </form>
               </>

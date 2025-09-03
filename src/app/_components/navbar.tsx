@@ -65,7 +65,7 @@ function UserMenu({ user, isMobile = false }: { user: { name?: string | null, im
   return (
     <div className={containerClasses}>
       <Link href="/dashboard" className="text-sm font-medium text-white hover:underline">
-        Kampanyalar
+        Campaigns
       </Link>
       <Link href="/dashboard/influencers" className="text-sm font-medium text-white hover:underline">
         Influencers

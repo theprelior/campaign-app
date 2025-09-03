@@ -118,7 +118,7 @@ function DashboardContent() {
 
                 {/* Sağ Taraf: Kampanya Listesi */}
                 <div className="lg:col-span-2">
-                    <h2 className="text-xl font-semibold">C</h2>
+                    <h2 className="text-xl font-semibold">Campaigns</h2>
                     {isLoading && <p className="mt-4">Campaigns are Loading...</p>}
 
                     {/* Kampanya Kartları Grid'i */}
