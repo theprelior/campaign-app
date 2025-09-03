@@ -4,7 +4,7 @@ This project is a small full-stack web application that simulates a mini campaig
 
 ## 🚀 Live Demo
 
-[Link to your Vercel deployment will go here]
+[[Link to Live project](https://campaign-app-mu.vercel.app/)]
 
 ## ✨ Features
 
