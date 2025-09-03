@@ -6,7 +6,7 @@ import { createTRPCReact } from "@trpc/react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
 import SuperJSON from "superjson";
-import { SessionProvider } from "next-auth/react"; // BU SATIRI EKLEYİN
+import { SessionProvider } from "next-auth/react"; //for session control
 
 import { type AppRouter } from "~/server/api/root";
 import { createQueryClient } from "./query-client";
@@ -64,7 +64,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
   );
 
   return (
-    <SessionProvider>
+    <SessionProvider> {/*we added for session control */}
     <QueryClientProvider client={queryClient}>
       <api.Provider client={trpcClient} queryClient={queryClient}>
         {props.children}
