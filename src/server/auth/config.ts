@@ -12,6 +12,9 @@ import {
   verificationTokens,
 } from "~/server/db/schema";
 
+
+console.log("VERCEL'DEKİ DATABASE_URL:", env.DATABASE_URL);
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
