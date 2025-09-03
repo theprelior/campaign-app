@@ -28,12 +28,12 @@ export default function Navbar() {
         </Link>
 
         {/* Orta/Büyük Ekran Menüsü (Desktop Menu) */}
-        <div className="hidden items-center gap-4 md:flex">
+        <div className="hidden items-center gap-4 lg:flex">
           {user ? <UserMenu user={user} /> : <SignInButton />}
         </div>
 
         {/* Mobil Ekran Hamburger Butonu */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           {user && (
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
               {isMenuOpen ? (
