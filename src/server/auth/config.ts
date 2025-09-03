@@ -1,6 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
 import { env } from "~/env";
 import GitHub from "next-auth/providers/github"; // Bu satırı ekleyin
 
@@ -11,9 +10,6 @@ import {
   users,
   verificationTokens,
 } from "~/server/db/schema";
-
-
-console.log("VERCEL'DEKİ DATABASE_URL:", env.DATABASE_URL);
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -43,8 +39,7 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
-    DiscordProvider,
-    GitHub({ // Bu bölümü ekleyin
+    GitHub({ // Github for login
       clientId: env.AUTH_GITHUB_ID,
       clientSecret: env.AUTH_GITHUB_SECRET,
     })

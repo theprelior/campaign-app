@@ -15,7 +15,7 @@ const config = {
                 pathname: "/u/**",
             },
         ],
-    },
+    }, //Added for profile avatar
 };
 
 export default config;

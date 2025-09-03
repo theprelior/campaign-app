@@ -3,7 +3,7 @@ import "~/styles/globals.css";
 import { type Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import Navbar from "./_components/navbar"; // Navbar'ı import edin
+import Navbar from "./_components/navbar"; // Navbar import
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -21,7 +21,7 @@ export default function RootLayout({
    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
   <body>
     <TRPCReactProvider>
-      <Navbar />
+      <Navbar /> {/*Added navbar */}
       {children}
     </TRPCReactProvider>
   </body>

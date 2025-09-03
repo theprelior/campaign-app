@@ -8,8 +8,8 @@ import { influencerRouter } from "./routers/influencer"; // Bu satırı ekle
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  campaign: campaignRouter, // Bu satırı ekleyin
-  influencer: influencerRouter, 
+  campaign: campaignRouter, // Our campaign page
+  influencer: influencerRouter, // Our influencer page
 });
 
 // export type definition of API

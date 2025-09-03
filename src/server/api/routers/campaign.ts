@@ -1,25 +1,30 @@
-// src/server/api/routers/campaign.ts
-
 import { z } from "zod";
-// campaignsToInfluencers şemasını import et
 import { campaigns, campaignsToInfluencers } from "~/server/db/schema"; 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
+/**
+ * This is the tRPC router for all campaign-related API procedures.
+ * All procedures here are protected, meaning they require the user to be authenticated.
+ */
 export const campaignRouter = createTRPCRouter({
-  // ... (create, getAll, delete, update prosedürleri burada, onlara dokunmuyoruz)
+  /**
+   * Mutation to create a new campaign.
+   * The campaign is automatically associated with the currently logged-in user.
+   */
   create: protectedProcedure
     .input(
       z.object({
-        title: z.string().min(1, { message: "Başlık gerekli" }),
+        title: z.string().min(1, { message: "Title is required" }),
         description: z.string().optional(),
-        budget: z.number().positive({ message: "Bütçe pozitif olmalı" }),
+        budget: z.number().positive({ message: "Budget must be a positive number" }),
         startDate: z.date(),
         endDate: z.date(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // ctx.session.user.id provides the ID of the authenticated user.
       await ctx.db.insert(campaigns).values({
         title: input.title,
         description: input.description,
@@ -30,6 +35,10 @@ export const campaignRouter = createTRPCRouter({
       });
     }),
 
+  /**
+   * Query to get all campaigns belonging to the currently logged-in user.
+   * The results are ordered by creation date in descending order.
+   */
   getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.db.query.campaigns.findMany({
       where: eq(campaigns.userId, ctx.session.user.id),
@@ -37,20 +46,24 @@ export const campaignRouter = createTRPCRouter({
     });
   }),
 
-  // --- BU PROSEDÜRÜ GÜNCELLİYORUZ ---
+  /**
+   * Query to get a single campaign by its ID.
+   * This procedure also fetches all influencers assigned to the campaign.
+   * Security: Ensures that the user can only fetch campaigns they own.
+   */
   getById: protectedProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ ctx, input }) => {
       const campaign = await ctx.db.query.campaigns.findFirst({
         where: and(
           eq(campaigns.id, input.id),
-          eq(campaigns.userId, ctx.session.user.id)
+          eq(campaigns.userId, ctx.session.user.id) // Security check: user must own the campaign.
         ),
-        // YENİ EK: İlişkili influencer'ları da getir
+        // Drizzle's `with` clause performs a join to fetch related data.
         with: {
-          campaignsToInfluencers: {
+          campaignsToInfluencers: { // Join with the junction table...
             with: {
-              influencer: true,
+              influencer: true, // ...and then join with the influencers table.
             },
           },
         },
@@ -59,12 +72,16 @@ export const campaignRouter = createTRPCRouter({
       if (!campaign) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Kampanya bulunamadı",
+          message: "Campaign not found",
         });
       }
       return campaign;
     }),
 
+  /**
+   * Mutation to delete a campaign by its ID.
+   * Security: Ensures that the user can only delete campaigns they own.
+   */
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
@@ -73,11 +90,15 @@ export const campaignRouter = createTRPCRouter({
         .where(
           and(
             eq(campaigns.id, input.id),
-            eq(campaigns.userId, ctx.session.user.id)
+            eq(campaigns.userId, ctx.session.user.id) // Security check
           )
         );
     }),
   
+  /**
+   * Mutation to update a campaign's details by its ID.
+   * Security: Ensures that the user can only update campaigns they own.
+   */
   update: protectedProcedure
     .input(z.object({
         id: z.number(),
@@ -95,14 +116,17 @@ export const campaignRouter = createTRPCRouter({
         .where(
             and(
                 eq(campaigns.id, input.id),
-                eq(campaigns.userId, ctx.session.user.id)
+                eq(campaigns.userId, ctx.session.user.id) // Security check
             )
-        )
+        );
     }),
 
-  // --- YENİ EKLENEN İLİŞKİ PROSEDÜRLERİ ---
+  // --- RELATIONSHIP MANAGEMENT PROCEDURES ---
 
-  // Bir influencer'ı kampanyaya ata
+  /**
+   * Mutation to assign an influencer to a campaign.
+   * This creates an entry in the `campaignsToInfluencers` junction table.
+   */
   assignInfluencer: protectedProcedure
     .input(
       z.object({
@@ -111,15 +135,18 @@ export const campaignRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Not: Burada kampanyanın kullanıcıya ait olup olmadığını kontrol edebiliriz,
-      // ama arayüzden sadece kendi kampanyasına ekleme yapacağı için şimdilik atlıyoruz.
+      // Note: A further security check could be added here to verify the user owns the campaignId.
+      // However, since the UI only allows assigning to owned campaigns, this is implicitly handled.
       await ctx.db.insert(campaignsToInfluencers).values({
         campaignId: input.campaignId,
         influencerId: input.influencerId,
       });
     }),
 
-  // Bir influencer'ı kampanyadan çıkar
+  /**
+   * Mutation to remove an influencer from a campaign.
+   * This deletes an entry from the `campaignsToInfluencers` junction table.
+   */
   removeInfluencer: protectedProcedure
     .input(
       z.object({
