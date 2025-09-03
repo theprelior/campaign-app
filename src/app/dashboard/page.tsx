@@ -99,7 +99,7 @@ function DashboardContent() {
                             />
                             <input
                                 type="number"
-                                placeholder="Budget (TL)"
+                                placeholder="Budget ($)"
                                 value={budget}
                                 onChange={(e) => setBudget(e.target.value)}
                                 className="w-full rounded-lg border px-4 py-2"
@@ -132,7 +132,7 @@ function DashboardContent() {
                                 <div className="h-full rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-500">
                                     <h3 className="font-bold text-lg">{campaign.title}</h3>
                                     <p className="mt-1 text-sm text-gray-600 flex-grow">{campaign.description || "No description."}</p>
-                                    <p className="mt-2 text-right font-semibold text-blue-700">{campaign.budget.toLocaleString()} TL</p>
+                                    <p className="mt-2 text-right font-semibold text-blue-700">{campaign.budget.toLocaleString()} $</p>
                                 </div>
                             </Link>
                         ))}
