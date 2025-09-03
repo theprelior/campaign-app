@@ -2,6 +2,9 @@
 
 This project is a small full-stack web application that simulates a mini campaign management tool. It was built using a modern tech stack including Next.js, tRPC, Supabase, and Drizzle.
 
+# For developers read the documentation
+[[Link to documentation](https://github.com/theprelior/campaign-app/blob/main/documentation.md)]
+
 ## 🚀 Live Demo
 
 [[Link to Live project](https://campaign-app-mu.vercel.app/)]
