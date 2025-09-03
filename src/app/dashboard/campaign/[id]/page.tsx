@@ -1,29 +1,24 @@
-// src/app/dashboard/campaign/[id]/page.tsx
+"use client";
 
-"use client"; // Bu satırı dosyanın en üstünde tutuyoruz.
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "~/server/api/root";
+import ConfirmationModal from "~/app/_components/confirmationModal"; // Importing our new modal
 
-// Tipleri dosyanın en üstünde tanımlıyoruz
+// Type definitions remain the same
 type CampaignWithInfluencers = inferRouterOutputs<AppRouter>["campaign"]["getById"];
 
-// Prop tipi için yeni tanımımız
 type CampaignDetailPageProps = {
   params: { id: string };
 };
 
-// ANA SAYFA BİLEŞENİ (default export)
-// Bu bileşen, prop tipini kullanarak hatayı çözüyor.
+// This is the main page component
 export default function CampaignDetailPage({ params }: CampaignDetailPageProps) {
   const campaignId = Number(params.id);
 
-  // ID'nin geçerli bir sayı olup olmadığını kontrol ediyoruz.
-  // Eğer değilse, hata mesajı gösterip client tarafı mantığını hiç çalıştırmıyoruz.
   if (isNaN(campaignId)) {
     return (
       <div className="container mx-auto p-8">
@@ -36,21 +31,33 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
 }
 
 
-// TÜM MANTIĞI İÇEREN CLIENT BİLEŞENİ
+// This is the client component containing all the logic
 function CampaignClientPage({ campaignId }: { campaignId: number }) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
-  
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for the modal
+
   const { data: campaign, isLoading, error } = api.campaign.getById.useQuery({ id: campaignId });
   
-  const [title, setTitle] = useState(campaign?.title ?? "");
-  const [description, setDescription] = useState(campaign?.description ?? "");
-  const [budget, setBudget] = useState(campaign?.budget.toString() ?? "");
+  // State for the edit form fields
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [budget, setBudget] = useState("");
   
   const utils = api.useUtils();
 
+  // This effect ensures the form fields are populated when the campaign data loads
+  useEffect(() => {
+    if (campaign) {
+      setTitle(campaign.title ?? "");
+      setDescription(campaign.description ?? "");
+      setBudget(campaign.budget.toString() ?? "");
+    }
+  }, [campaign]);
+
   const deleteMutation = api.campaign.delete.useMutation({
     onSuccess: () => {
+      setIsModalOpen(false); // Close the modal on success
       void utils.campaign.getAll.invalidate();
       router.push("/dashboard");
     },
@@ -62,12 +69,11 @@ function CampaignClientPage({ campaignId }: { campaignId: number }) {
           void utils.campaign.getAll.invalidate();
           setIsEditing(false);
       }
-  })
+  });
 
+  // This function is now called by the modal's confirm button
   const handleDelete = () => {
-    if (window.confirm("Are you sure that to delete this campaign.")) {
       deleteMutation.mutate({ id: campaignId });
-    }
   };
   
   const handleUpdate = (e: React.FormEvent) => {
@@ -77,22 +83,21 @@ function CampaignClientPage({ campaignId }: { campaignId: number }) {
           title,
           description,
           budget: Number(budget)
-      })
-  }
+      });
+  };
   
   const startEditing = () => {
-      setTitle(campaign?.title ?? "");
-      setDescription(campaign?.description ?? "");
-      setBudget(campaign?.budget.toString() ?? "");
       setIsEditing(true);
-  }
+  };
 
   if (isLoading) return <div className="container mx-auto p-8">Loading...</div>;
   if (error) return <div className="container mx-auto p-8 text-red-500">Error: {error.message}</div>;
-  if (!campaign) return <div className="container mx-auto p-8">Couldn't find the campaign.</div>;
+  if (!campaign) return <div className="container mx-auto p-8">Campaign not found.</div>;
 
   return (
-    <div className="container mx-auto p-8">
+    // We use a Fragment <> to wrap the page content and the modal
+    <>
+      <div className="container mx-auto p-8">
         <div className="mb-6">
             <Link 
             href="/dashboard" 
@@ -107,14 +112,14 @@ function CampaignClientPage({ campaignId }: { campaignId: number }) {
 
         {isEditing ? (
             <form onSubmit={handleUpdate} className="rounded-lg border p-6 shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Edit the Campaign</h1>
+                <h1 className="text-2xl font-bold mb-4">Edit Campaign</h1>
                 <div className="flex flex-col gap-4">
-                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-lg border px-4 py-2" />
-                    <textarea value={description ?? ""} onChange={e => setDescription(e.target.value)} className="w-full rounded-lg border px-4 py-2" />
-                    <input type="number" value={budget} onChange={e => setBudget(e.target.value)} className="w-full rounded-lg border px-4 py-2" />
+                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-lg border px-4 py-2" placeholder="Campaign Title" />
+                    <textarea value={description ?? ""} onChange={e => setDescription(e.target.value)} className="w-full rounded-lg border px-4 py-2" placeholder="Description" />
+                    <input type="number" value={budget} onChange={e => setBudget(e.target.value)} className="w-full rounded-lg border px-4 py-2" placeholder="Budget"/>
                     <div className="flex gap-4">
                         <button type="submit" className="rounded-lg bg-green-600 px-6 py-2 font-semibold text-white" disabled={updateMutation.isPending}>
-                        {updateMutation.isPending ? "Saving..." : "Save"}
+                        {updateMutation.isPending ? "Saving..." : "Save Changes"}
                         </button>
                         <button type="button" onClick={() => setIsEditing(false)} className="rounded-lg bg-gray-500 px-6 py-2 font-semibold text-white">Cancel</button>
                     </div>
@@ -126,12 +131,13 @@ function CampaignClientPage({ campaignId }: { campaignId: number }) {
                     <div>
                         <h1 className="text-4xl font-bold">{campaign.title}</h1>
                         <p className="mt-2 text-lg text-gray-600">{campaign.description}</p>
-                        <p className="mt-4 text-2xl font-semibold text-blue-700">{campaign.budget.toLocaleString()} TL Budget</p>
+                        <p className="mt-4 text-2xl font-semibold text-blue-700">${campaign.budget.toLocaleString()} Budget</p>
                     </div>
                     <div className="flex gap-2">
-                        <button onClick={startEditing} className="rounded-lg bg-yellow-500 px-4 py-2 font-semibold text-white">Düzenle</button>
-                        <button onClick={handleDelete} disabled={deleteMutation.isPending} className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white disabled:bg-gray-400">
-                        {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                        <button onClick={startEditing} className="rounded-lg bg-yellow-500 px-4 py-2 font-semibold text-white">Edit</button>
+                        {/* This button now opens the modal */}
+                        <button onClick={() => setIsModalOpen(true)} className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white">
+                            Delete
                         </button>
                     </div>
                 </div>
@@ -141,19 +147,29 @@ function CampaignClientPage({ campaignId }: { campaignId: number }) {
                     <AssignedInfluencersList campaign={campaign} />
                 </div>
                 <div className="my-10 border-t pt-10">
-                    <h2 className="text-2xl font-bold mb-4">New Influencer Assign</h2>
+                    <h2 className="text-2xl font-bold mb-4">Assign a New Influencer</h2>
                     <AssignInfluencer campaign={campaign} />
                 </div>
             </>
         )}
-    </div>
+      </div>
+
+      {/* The Confirmation Modal is placed here */}
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete Campaign"
+        message="Are you sure you want to permanently delete this campaign? This action cannot be undone."
+        confirmText="Yes, Delete"
+        isConfirming={deleteMutation.isPending}
+      />
+    </>
   );
 }
 
 
-
-function AssignedInfluencersList({ campaign }: { campaign: CampaignWithInfluencers }) {
-    // ...
+function AssignedInfluencersList({ campaign }: { campaign: NonNullable<CampaignWithInfluencers> }) {
     const utils = api.useUtils();
     const removeMutation = api.campaign.removeInfluencer.useMutation({
         onSuccess: () => {
@@ -164,7 +180,7 @@ function AssignedInfluencersList({ campaign }: { campaign: CampaignWithInfluence
     const assignedInfluencers = campaign.campaignsToInfluencers.map(item => item.influencer);
 
     if (assignedInfluencers.length === 0) {
-        return <p className="text-gray-500">There isn't any assigned Influencer to this Campaign.</p>
+        return <p className="text-gray-500">No influencers have been assigned to this campaign yet.</p>
     }
     
     return (
@@ -173,22 +189,21 @@ function AssignedInfluencersList({ campaign }: { campaign: CampaignWithInfluence
                 <li key={inf.id} className="rounded-lg border p-4 flex justify-between items-center">
                     <div>
                         <p className="font-bold">{inf.name}</p>
-                        <p className="text-sm text-gray-600">{inf.followerCount.toLocaleString()} Follower</p>
+                        <p className="text-sm text-gray-600">{inf.followerCount.toLocaleString()} followers</p>
                     </div>
                     <button 
                         onClick={() => removeMutation.mutate({ campaignId: campaign.id, influencerId: inf.id })}
-                        className="text-red-500 hover:underline text-sm"
+                        className="text-red-500 hover:underline text-sm font-medium"
                     >
                         Remove
                     </button>
                 </li>
             ))}
         </ul>
-    )
+    );
 }
 
-function AssignInfluencer({ campaign }: { campaign: CampaignWithInfluencers }) {
-    // ...
+function AssignInfluencer({ campaign }: { campaign: NonNullable<CampaignWithInfluencers> }) {
     const { data: allInfluencers } = api.influencer.getAll.useQuery();
     const utils = api.useUtils();
     const assignMutation = api.campaign.assignInfluencer.useMutation({
@@ -207,21 +222,21 @@ function AssignInfluencer({ campaign }: { campaign: CampaignWithInfluencers }) {
                     const influencerId = Number(e.target.value);
                     if (!influencerId) return;
                     assignMutation.mutate({ campaignId: campaign.id, influencerId });
-                    e.target.value = ""; // Seçimi sıfırla
+                    e.target.value = ""; // Reset select after choosing
                 }}
                 className="w-full rounded-lg border px-4 py-2"
                 disabled={!availableInfluencers || availableInfluencers.length === 0}
             >
-                <option value="">Chose an Influencer...</option>
+                <option value="">Select an influencer...</option>
                 {availableInfluencers?.map(inf => (
                     <option key={inf.id} value={inf.id}>
-                        {inf.name} ({inf.followerCount.toLocaleString()} Follower)
+                        {inf.name} ({inf.followerCount.toLocaleString()} Followers)
                     </option>
                 ))}
             </select>
-            {!availableInfluencers || availableInfluencers.length === 0 && (
-                <p className="text-sm text-gray-500 mt-2">There is no available Influencer.</p>
+            {(!availableInfluencers || availableInfluencers.length === 0) && (
+                <p className="text-sm text-gray-500 mt-2">No available influencers to assign.</p>
             )}
         </div>
-    )
+    );
 }
