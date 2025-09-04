@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { campaigns, campaignsToInfluencers } from "~/server/db/schema"; 
+import { campaigns, campaignsToInfluencers } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -105,6 +105,9 @@ export const campaignRouter = createTRPCRouter({
         title: z.string().min(1).optional(),
         description: z.string().optional(),
         budget: z.number().positive().optional(),
+        // Add optional date fields to the update schema
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
         await ctx.db.update(campaigns)
@@ -112,6 +115,9 @@ export const campaignRouter = createTRPCRouter({
             title: input.title,
             description: input.description,
             budget: input.budget,
+            // Add date fields to the update operation
+            startDate: input.startDate,
+            endDate: input.endDate,
         })
         .where(
             and(
@@ -165,3 +171,4 @@ export const campaignRouter = createTRPCRouter({
         );
     }),
 });
+
